@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
   for(int i = 0; i < size; i++){
     array[i] = i*i;
   }
-  arrayAdd(array, size, 2);
+  arrayAdd(array, size, inc);
   for(int i = 0; i < size; i++){
     printf("index: %d, value %d\n", i, array[i]);
   }
