@@ -75,7 +75,7 @@ int main()
       printf(" Last name: ");
       fgets(inputBuff, BUFFSIZE, stdin);
       sscanf(inputBuff, "%s", lname);
-          
+
       printf(" Enter age: ");
       int age = getInputNumber();
 

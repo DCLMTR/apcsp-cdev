@@ -22,12 +22,10 @@ Student* students[100] = {0};
 void createStudent(char* fname, char* lname, int age, int id)
 {
   Student* st = (Student*)malloc(sizeof(Student));
-  char* firstname = (char*)malloc(50*sizeof(fname));
-  firstname = fname;
-  char* lastname = (char*)malloc(50*sizeof(lname));
-  lastname = lname;
-  st->firstName = firstname;
-  st->lastName = lastname;
+  st->firstName = (char*)malloc(strlen(fname)+1);
+  st->lastName = (char*)malloc(strlen(lname)+1);
+  strcpy(st->firstName, fname);
+  strcpy(st->lastName, lname);
   st->age = age;
   st->id = id;
   students[numStudents] = st;
@@ -69,9 +67,19 @@ FILE* fp;
 fp = fopen(STUFILE, "w");
 if (fp) 
 {
+  char buff[256];
   for(int i = 0; i < numStudents; i++)
-    //add encryption for key later students[i].fname+=key;
-    fprintf(fp, "%s %s %d %lu\n", students[i]->firstName, students[i]->lastName, students[i]->age, students[i]->id);
+  {
+    Student* st = students[i];
+    sprintf(buff, "%s %s %d %ld", st->firstName, st->lastName, st->age, st->id);
+    if(key != 0)
+    {
+      caesarEncrypt(buff, key);
+    }
+    printf("saving: %s\n", buff);
+    fprintf(fp, "%s\n", buff);
+  }
+  printf("saved %d students\n", numStudents);
   fclose(fp);
 }
   // save all students in the student array to a file 'studentdata.txt' overwriting
@@ -86,31 +94,34 @@ if (fp)
 void loadStudents(int key)
 {
   // load the students from the data file overwriting all exisiting students in memory
+  if(numStudents > 0)
+    deleteStudents();
   FILE* fp;
-  fp = fopen("studentdata.txt", "r");
+  fp = fopen(STUFILE, "r");
   if (fp) 
   {
-    numStudents = 0;
+  char b1[256]; char b2[256]; char b3[256]; char b4[256];
     while (1)
     {
-      char* fname = (char*)malloc(50 * sizeof(char)); char* lname = (char*)malloc(50 * sizeof(char)); int age; long unsigned int id;
-      if (fscanf(fp, "%s %s %d %lu\n", fname, lname, &age, &id) == 2)
+      if (fscanf(fp, "%s %s %s %s\n", b1, b2, b3, b4) == 4)
       {
-        //printf("test");
-        //students[numStudents]->firstName = fname;
-        //students[numStudents]->lastName = lname;
-        //students[numStudents]->age = age;
-        //students[numStudents]->id = id;
-        //numStudents++;
+        if(key != 0)
+        {
+          caesarDecrypt(b1, key);
+	  caesarDecrypt(b2, key);
+	  caesarDecrypt(b3, key);
+	  caesarDecrypt(b4, key);
+	}
+	int age; long id;
+	sscanf(b3, "%d", &age);
+	sscanf(b4, "%ld", &id);
+	createStudent(b1, b2, age, id);
       }
       else
-      {
-        free(fname);
-        free(lname);
         break;
-      }
-      fclose(fp);
     }
+  printf("loaded %d students\n", numStudents);
+  fclose(fp);
   }
 }
 
